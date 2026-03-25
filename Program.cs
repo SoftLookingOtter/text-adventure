@@ -1,40 +1,73 @@
 ﻿using System.Text;
-using System.Text.RegularExpressions;
+
+enum Location
+{
+    Entrance,
+    Lobby
+}
 
 class Program
 {
-    const ConsoleColor TitleColor = ConsoleColor.White;
-    const ConsoleColor NarrativeColor = ConsoleColor.Gray;
-    const ConsoleColor PromptColor = ConsoleColor.White;
-    const ConsoleColor ReplyColor = ConsoleColor.DarkGray;
-    const int PrintPauseMilliseconds = 20;
-
-    static bool ShouldQuit = false;
+    static bool shouldQuit = false;
+    static Location currentLocation = Location.Entrance;
 
     static void Main()
     {
         Console.OutputEncoding = Encoding.UTF8;
-        Console.CursorVisible = true;
 
-        DisplayTitle();
-        DisplayIntro();
+        ShowTitle();
+        ShowIntro();
+        ShowLocation();
 
-        while (!ShouldQuit)
+        while (!shouldQuit)
         {
-            HandlePlayerAction();
-        }
+            Console.Write("> ");
+            string input = ReadCommand();
 
-        Console.ResetColor();
+            if (input == "")
+            {
+                Console.WriteLine("Please type a command.");
+                Console.WriteLine();
+                continue;
+            }
+
+            input = input.ToLower().Trim();
+
+            if (input == "quit" || input == "exit" || input == "end" || input == "q")
+            {
+                Console.WriteLine("Goodbye!");
+                shouldQuit = true;
+            }
+            else if (input == "help")
+            {
+                ShowHelp();
+            }
+            else if (input == "look" || input == "l")
+            {
+                ShowLocation();
+            }
+            else if (input == "north" || input == "n")
+            {
+                Move("north");
+            }
+            else if (input == "south" || input == "s")
+            {
+                Move("south");
+            }
+            else
+            {
+                Console.WriteLine("I don't understand that command.");
+                Console.WriteLine("Try: look, north, south, help, quit");
+                Console.WriteLine();
+            }
+        }
     }
 
-    static void DisplayTitle()
+    static void ShowTitle()
     {
-        Console.ForegroundColor = TitleColor;
-
         if (File.Exists("Title.txt"))
         {
-            string title = File.ReadAllText("Title.txt");
-            Console.WriteLine(title);
+            Console.WriteLine(File.ReadAllText("Title.txt"));
         }
         else
         {
@@ -49,115 +82,102 @@ class Program
         Console.Clear();
     }
 
-    static void DisplayIntro()
+    static void ShowIntro()
     {
-        Console.ForegroundColor = NarrativeColor;
-
-        Print("You arrive at the entrance of a strange and quiet place.");
-        Print("Tonight, your goal is simple: explore and understand your surroundings.");
-        Print();
-        Print("Available commands: look, north, south, help, quit");
-        Print("Press Esc at any time to quit.");
-        Print();
+        Console.WriteLine("You arrive at the entrance of a strange and quiet place.");
+        Console.WriteLine("Tonight, your goal is simple: explore and understand your surroundings.");
+        Console.WriteLine();
+        Console.WriteLine("Commands: look, north, south, help, quit");
+        Console.WriteLine();
     }
 
-    static void HandlePlayerAction()
+    static void ShowLocation()
     {
-        Console.ForegroundColor = NarrativeColor;
-        Print("What do you want to do?");
-        Print("Commands: look, north, south, help, quit");
-        Print("Press Esc to exit.");
-
-        Console.ForegroundColor = PromptColor;
-        Console.Write("> ");
-
-        string? command = ReadCommand();
-
-        if (command == null)
+        if (currentLocation == Location.Entrance)
         {
-            Reply("Goodbye!");
-            ShouldQuit = true;
-            Print();
-            return;
+            Console.WriteLine("You are standing outside a quiet building.");
+            Console.WriteLine("A doorway leads north into the lobby.");
+            Console.WriteLine("You can go: north");
+        }
+        else if (currentLocation == Location.Lobby)
+        {
+            Console.WriteLine("You are inside the lobby.");
+            Console.WriteLine("It is still and quiet here.");
+            Console.WriteLine("The exit is back to the south.");
+            Console.WriteLine("You can go: south");
         }
 
-        command = command.Trim().ToLowerInvariant();
-
-        if (string.IsNullOrWhiteSpace(command))
-        {
-            Reply("Please enter a command.");
-            Print();
-            return;
-        }
-
-        string[] words = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        string verb = words[0];
-
-        switch (verb)
-        {
-            case "look":
-            case "l":
-                Reply("You take a careful look around.");
-                break;
-
-            case "north":
-            case "n":
-                Reply("You try going north.");
-                break;
-
-            case "south":
-            case "s":
-                Reply("You try going south.");
-                break;
-
-            case "help":
-                ShowHelp();
-                break;
-
-            case "quit":
-            case "exit":
-            case "end":
-            case "q":
-                Reply("Goodbye!");
-                ShouldQuit = true;
-                break;
-
-            default:
-                Reply("I do not understand that command.");
-                Reply("Type one of the listed commands or press Esc to quit.");
-                break;
-        }
-
-        Print();
+        Console.WriteLine();
     }
 
-    static string? ReadCommand()
+    static void Move(string direction)
     {
-        StringBuilder builder = new StringBuilder();
+        if (currentLocation == Location.Entrance)
+        {
+            if (direction == "north")
+            {
+                currentLocation = Location.Lobby;
+                ShowLocation();
+            }
+            else
+            {
+                Console.WriteLine("You can't go that way.");
+                Console.WriteLine();
+            }
+        }
+        else if (currentLocation == Location.Lobby)
+        {
+            if (direction == "south")
+            {
+                currentLocation = Location.Entrance;
+                ShowLocation();
+            }
+            else
+            {
+                Console.WriteLine("You can't go that way.");
+                Console.WriteLine();
+            }
+        }
+    }
+
+    static void ShowHelp()
+    {
+        Console.WriteLine("Available commands:");
+        Console.WriteLine("  look  - look around");
+        Console.WriteLine("  north - move north");
+        Console.WriteLine("  south - move south");
+        Console.WriteLine("  help  - show commands");
+        Console.WriteLine("  quit  - exit the game");
+        Console.WriteLine();
+    }
+
+    static string ReadCommand()
+    {
+        StringBuilder text = new StringBuilder();
 
         while (true)
         {
-            ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
+            ConsoleKeyInfo key = Console.ReadKey(true);
 
-            if (keyInfo.Key == ConsoleKey.Escape)
+            if (key.Key == ConsoleKey.Escape)
             {
                 Console.WriteLine();
-                return null;
+                return "quit";
             }
 
-            if (keyInfo.Key == ConsoleKey.Enter)
+            if (key.Key == ConsoleKey.Enter)
             {
                 Console.WriteLine();
-                return builder.ToString();
+                return text.ToString();
             }
 
-            if (keyInfo.Key == ConsoleKey.Backspace)
+            if (key.Key == ConsoleKey.Backspace)
             {
-                if (builder.Length > 0)
+                if (text.Length > 0)
                 {
-                    builder.Length--;
+                    text.Length--;
 
-                    if (Console.CursorLeft > 2)
+                    if (Console.CursorLeft > 0)
                     {
                         Console.Write("\b \b");
                     }
@@ -166,64 +186,11 @@ class Program
                 continue;
             }
 
-            char character = keyInfo.KeyChar;
-
-            if (!char.IsControl(character))
+            if (!char.IsControl(key.KeyChar))
             {
-                builder.Append(character);
-                Console.Write(character);
+                text.Append(key.KeyChar);
+                Console.Write(key.KeyChar);
             }
         }
-    }
-
-    static void ShowHelp()
-    {
-        Reply("Available commands:");
-        Reply("  look (l)   - look around");
-        Reply("  north (n)  - try going north");
-        Reply("  south (s)  - try going south");
-        Reply("  help       - show this list");
-        Reply("  quit (q)      - exit the game");
-        Reply("  esc        - exit the game immediately");
-    }
-
-    static void Print()
-    {
-        Console.WriteLine();
-    }
-
-    static void Print(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            Console.WriteLine();
-            return;
-        }
-
-        int maximumLineLength = Math.Max(20, Console.WindowWidth - 1);
-
-        MatchCollection lineMatches = Regex.Matches(
-            text,
-            @"(.{1," + maximumLineLength + @"})(?:\s|$)"
-        );
-
-        foreach (Match match in lineMatches)
-        {
-            string line = match.Groups[0].Value.TrimEnd();
-
-            if (!string.IsNullOrWhiteSpace(line))
-            {
-                Console.ForegroundColor = NarrativeColor;
-                Console.WriteLine(line);
-                Thread.Sleep(PrintPauseMilliseconds);
-            }
-        }
-    }
-
-    static void Reply(string text)
-    {
-        Console.ForegroundColor = ReplyColor;
-        Print(text);
-        Console.ForegroundColor = NarrativeColor;
     }
 }

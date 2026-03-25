@@ -12,3 +12,4 @@
 /Users/saralinden/The-Indie-Quest/TextAdventure/Game/obj/Debug/net10.0/Game.pdb
 /Users/saralinden/The-Indie-Quest/TextAdventure/Game/obj/Debug/net10.0/Game.genruntimeconfig.cache
 /Users/saralinden/The-Indie-Quest/TextAdventure/Game/obj/Debug/net10.0/ref/Game.dll
+/Users/saralinden/The-Indie-Quest/TextAdventure/Game/obj/Debug/net10.0/Game.sourcelink.json

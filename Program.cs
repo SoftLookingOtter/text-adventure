@@ -3,13 +3,23 @@
 enum Location
 {
     Entrance,
-    Lobby
+    Lobby,
+    Office,
+    Kitchen
+}
+
+enum Item
+{
+    Key
 }
 
 class Program
 {
     static bool shouldQuit = false;
     static Location currentLocation = Location.Entrance;
+
+    // var key är (-1 = inventory)
+    static int keyLocation = (int)Location.Office;
 
     static void Main()
     {
@@ -22,18 +32,15 @@ class Program
         while (!shouldQuit)
         {
             Console.Write("> ");
-            string input = ReadCommand();
+            string input = ReadCommand().ToLower().Trim();
 
             if (input == "")
             {
-                Console.WriteLine("Please type a command.");
-                Console.WriteLine();
+                Console.WriteLine("Please type a command.\n");
                 continue;
             }
 
-            input = input.ToLower().Trim();
-
-            if (input == "quit" || input == "exit" || input == "end" || input == "q")
+            if (input == "quit" || input == "exit" || input == "q")
             {
                 Console.WriteLine("Goodbye!");
                 shouldQuit = true;
@@ -42,9 +49,21 @@ class Program
             {
                 ShowHelp();
             }
-            else if (input == "look" || input == "l")
+            else if (input == "look")
             {
                 ShowLocation();
+            }
+            else if (input == "inventory" || input == "i")
+            {
+                ShowInventory();
+            }
+            else if (input.StartsWith("take "))
+            {
+                TakeItem(input);
+            }
+            else if (input.StartsWith("drop "))
+            {
+                DropItem(input);
             }
             else if (input == "north" || input == "n")
             {
@@ -54,101 +73,157 @@ class Program
             {
                 Move("south");
             }
+            else if (input == "east" || input == "e")
+            {
+                Move("east");
+            }
+            else if (input == "west" || input == "w")
+            {
+                Move("west");
+            }
             else
             {
-                Console.WriteLine("I don't understand that command.");
-                Console.WriteLine("Try: look, north, south, help, quit");
-                Console.WriteLine();
+                Console.WriteLine("I don't understand that.\n");
             }
         }
-    }
-
-    static void ShowTitle()
-    {
-        if (File.Exists("Title.txt"))
-        {
-            Console.WriteLine(File.ReadAllText("Title.txt"));
-        }
-        else
-        {
-            Console.WriteLine("========================");
-            Console.WriteLine("     TEXT ADVENTURE");
-            Console.WriteLine("========================");
-        }
-
-        Console.WriteLine();
-        Console.WriteLine("Press any key to start...");
-        Console.ReadKey(true);
-        Console.Clear();
-    }
-
-    static void ShowIntro()
-    {
-        Console.WriteLine("You arrive at the entrance of a strange and quiet place.");
-        Console.WriteLine("Tonight, your goal is simple: explore and understand your surroundings.");
-        Console.WriteLine();
-        Console.WriteLine("Commands: look, north, south, help, quit");
-        Console.WriteLine();
     }
 
     static void ShowLocation()
     {
         if (currentLocation == Location.Entrance)
         {
-            Console.WriteLine("You are standing outside a quiet building.");
-            Console.WriteLine("A doorway leads north into the lobby.");
-            Console.WriteLine("You can go: north");
+            Console.WriteLine("You are outside a building. You can go north.");
         }
         else if (currentLocation == Location.Lobby)
         {
-            Console.WriteLine("You are inside the lobby.");
-            Console.WriteLine("It is still and quiet here.");
-            Console.WriteLine("The exit is back to the south.");
-            Console.WriteLine("You can go: south");
+            Console.WriteLine("You are in the lobby. You can go south, east, west.");
+        }
+        else if (currentLocation == Location.Office)
+        {
+            Console.WriteLine("You are in a small office. There is a desk here.");
+
+            if (keyLocation == (int)Location.Office)
+            {
+                Console.WriteLine("You see a key on the desk.");
+            }
+
+            Console.WriteLine("You can go west.");
+        }
+        else if (currentLocation == Location.Kitchen)
+        {
+            Console.WriteLine("You are in the kitchen. It smells like food.");
+            Console.WriteLine("You can go east.");
         }
 
         Console.WriteLine();
     }
 
-    static void Move(string direction)
+    static void Move(string dir)
     {
-        if (currentLocation == Location.Entrance)
+        if (currentLocation == Location.Entrance && dir == "north")
         {
-            if (direction == "north")
+            currentLocation = Location.Lobby;
+        }
+        else if (currentLocation == Location.Lobby && dir == "south")
+        {
+            currentLocation = Location.Entrance;
+        }
+        else if (currentLocation == Location.Lobby && dir == "east")
+        {
+            currentLocation = Location.Office;
+        }
+        else if (currentLocation == Location.Lobby && dir == "west")
+        {
+            currentLocation = Location.Kitchen;
+        }
+        else if (currentLocation == Location.Office && dir == "west")
+        {
+            currentLocation = Location.Lobby;
+        }
+        else if (currentLocation == Location.Kitchen && dir == "east")
+        {
+            currentLocation = Location.Lobby;
+        }
+        else
+        {
+            Console.WriteLine("You can't go that way.\n");
+            return;
+        }
+
+        ShowLocation();
+    }
+
+    static void TakeItem(string input)
+    {
+        if (input.Contains("key"))
+        {
+            if (keyLocation == -1)
             {
-                currentLocation = Location.Lobby;
-                ShowLocation();
+                Console.WriteLine("You already have the key.\n");
+            }
+            else if (keyLocation != (int)currentLocation)
+            {
+                Console.WriteLine("There is no key here.\n");
             }
             else
             {
-                Console.WriteLine("You can't go that way.");
-                Console.WriteLine();
+                keyLocation = -1;
+                Console.WriteLine("You pick up the key.\n");
             }
         }
-        else if (currentLocation == Location.Lobby)
+    }
+
+    static void DropItem(string input)
+    {
+        if (input.Contains("key"))
         {
-            if (direction == "south")
+            if (keyLocation != -1)
             {
-                currentLocation = Location.Entrance;
-                ShowLocation();
+                Console.WriteLine("You don't have the key.\n");
             }
             else
             {
-                Console.WriteLine("You can't go that way.");
-                Console.WriteLine();
+                keyLocation = (int)currentLocation;
+                Console.WriteLine("You drop the key.\n");
             }
         }
+    }
+
+    static void ShowInventory()
+    {
+        Console.WriteLine("You are carrying:");
+
+        if (keyLocation == -1)
+        {
+            Console.WriteLine("- key");
+        }
+        else
+        {
+            Console.WriteLine("Nothing");
+        }
+
+        Console.WriteLine();
+    }
+
+    static void ShowTitle()
+    {
+        Console.WriteLine("TEXT ADVENTURE\nPress any key...");
+        Console.ReadKey(true);
+        Console.Clear();
+    }
+
+    static void ShowIntro()
+    {
+        Console.WriteLine("You arrive at a strange place.");
+        Console.WriteLine("Commands: look, move, take, drop, inventory, quit\n");
     }
 
     static void ShowHelp()
     {
-        Console.WriteLine("Available commands:");
-        Console.WriteLine("  look  - look around");
-        Console.WriteLine("  north - move north");
-        Console.WriteLine("  south - move south");
-        Console.WriteLine("  help  - show commands");
-        Console.WriteLine("  quit  - exit the game");
-        Console.WriteLine();
+        Console.WriteLine("Commands:");
+        Console.WriteLine("look, north, south, east, west");
+        Console.WriteLine("take [item], drop [item]");
+        Console.WriteLine("inventory, quit\n");
     }
 
     static string ReadCommand()
@@ -157,13 +232,10 @@ class Program
 
         while (true)
         {
-            ConsoleKeyInfo key = Console.ReadKey(true);
+            var key = Console.ReadKey(true);
 
             if (key.Key == ConsoleKey.Escape)
-            {
-                Console.WriteLine();
                 return "quit";
-            }
 
             if (key.Key == ConsoleKey.Enter)
             {
@@ -171,18 +243,10 @@ class Program
                 return text.ToString();
             }
 
-            if (key.Key == ConsoleKey.Backspace)
+            if (key.Key == ConsoleKey.Backspace && text.Length > 0)
             {
-                if (text.Length > 0)
-                {
-                    text.Length--;
-
-                    if (Console.CursorLeft > 0)
-                    {
-                        Console.Write("\b \b");
-                    }
-                }
-
+                text.Length--;
+                Console.Write("\b \b");
                 continue;
             }
 

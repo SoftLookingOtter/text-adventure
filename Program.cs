@@ -312,6 +312,7 @@ class Program
     {
         Console.WriteLine("You arrive at a strange place.");
         Console.WriteLine("Maybe there is something hidden here.");
+        Console.WriteLine("Type 'help' to see all commands.");
         Console.WriteLine("Commands: look, north, south, east, west, take, drop, inventory, use key, quit");
         Console.WriteLine();
     }

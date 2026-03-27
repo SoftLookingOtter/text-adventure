@@ -97,37 +97,48 @@ class Program
     {
         if (currentLocation == Location.Entrance)
         {
-            Console.WriteLine("You are outside a building. You can go north.");
+            Console.WriteLine("You are outside the building.");
+            Console.WriteLine("The entrance leads north into the lobby.");
+            Console.WriteLine("You can go: north");
         }
         else if (currentLocation == Location.Lobby)
         {
-            Console.WriteLine("You are in the lobby. You can go south, east, west.");
+            Console.WriteLine("You are in the lobby.");
+            Console.WriteLine("There is an office to the north and a kitchen to the west.");
+            Console.WriteLine("The exit is back to the south.");
+            Console.WriteLine("You can go: north, south, west");
         }
         else if (currentLocation == Location.Office)
         {
-            Console.WriteLine("You are in a small office. There is a desk here.");
+            Console.WriteLine("You are in a small office.");
+            Console.WriteLine("There is a desk here.");
 
             if (keyLocation == (int)Location.Office)
             {
                 Console.WriteLine("You see a key on the desk.");
+                Console.WriteLine("It looks important. You could try 'take key'.");
             }
 
-            Console.WriteLine("You can go west.");
+            Console.WriteLine("The lobby is back to the south.");
+            Console.WriteLine("You can go: south");
         }
         else if (currentLocation == Location.Kitchen)
         {
-            Console.WriteLine("You are in the kitchen. It smells like food.");
+            Console.WriteLine("You are in the kitchen.");
+            Console.WriteLine("It smells like food.");
 
             if (!gameWon)
             {
                 Console.WriteLine("There is a locked box here.");
+                Console.WriteLine("Maybe you can open it somehow. If you have the key, try 'use key'.");
             }
             else
             {
                 Console.WriteLine("The box is open.");
             }
 
-            Console.WriteLine("You can go east.");
+            Console.WriteLine("The lobby is back to the east.");
+            Console.WriteLine("You can go: east");
         }
 
         Console.WriteLine();
@@ -143,7 +154,7 @@ class Program
         {
             currentLocation = Location.Entrance;
         }
-        else if (currentLocation == Location.Lobby && dir == "east")
+        else if (currentLocation == Location.Lobby && dir == "north")
         {
             currentLocation = Location.Office;
         }
@@ -151,7 +162,7 @@ class Program
         {
             currentLocation = Location.Kitchen;
         }
-        else if (currentLocation == Location.Office && dir == "west")
+        else if (currentLocation == Location.Office && dir == "south")
         {
             currentLocation = Location.Lobby;
         }
@@ -262,7 +273,10 @@ class Program
         gameWon = true;
 
         Console.WriteLine("You unlock the box.");
-        Console.WriteLine("Inside, you find a note that says: You did it.");
+        Console.WriteLine("Inside, you find...");
+        Console.WriteLine("a single raw potato.");
+        Console.WriteLine("There is also a note that says:");
+        Console.WriteLine("\"Congratulations. You have unlocked disappointment.\"");
         Console.WriteLine();
     }
 
